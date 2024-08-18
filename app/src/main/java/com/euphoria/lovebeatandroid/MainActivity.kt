@@ -1,6 +1,7 @@
 package com.euphoria.lovebeatandroid
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Vibrator
 import androidx.activity.ComponentActivity
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.wear.compose.material.MaterialTheme
 import com.euphoria.lovebeatandroid.screens.MainScreen
+import com.euphoria.lovebeatandroid.services.PollingService
 import com.euphoria.lovebeatandroid.services.StorageService
 import com.euphoria.lovebeatandroid.services.VibrationService
 

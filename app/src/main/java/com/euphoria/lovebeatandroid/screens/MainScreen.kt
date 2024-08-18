@@ -1,5 +1,6 @@
 package com.euphoria.lovebeatandroid.screens
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startForegroundService
 import coil.compose.rememberImagePainter
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
@@ -38,6 +40,7 @@ import coil.size.Size
 import com.euphoria.lovebeatandroid.R
 import com.euphoria.lovebeatandroid.data.getRandomLoveNote
 import com.euphoria.lovebeatandroid.models.User
+import com.euphoria.lovebeatandroid.services.PollingService
 import com.euphoria.lovebeatandroid.services.StorageService
 import com.euphoria.lovebeatandroid.services.VibrationService
 import kotlinx.coroutines.delay
@@ -49,6 +52,7 @@ val great_vibes_font = FontFamily(
 
 @Composable
 fun MainScreen(storageService: StorageService, vibrationService: VibrationService) {
+    val context = LocalContext.current
     var user by remember { mutableStateOf(User()) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -60,6 +64,13 @@ fun MainScreen(storageService: StorageService, vibrationService: VibrationServic
         user.uuid = storageService.getMyUuid()
         user.partnerUuid = storageService.getPartnerUuid() ?: ""
         isLoading = false
+
+        if (user.uuid.isNotEmpty()) {
+            val intent = Intent(context, PollingService::class.java).apply {
+                putExtra("USER_ID", user.uuid)
+            }
+            startForegroundService(context, intent)
+        }
     }
 
     if (isLoading) {

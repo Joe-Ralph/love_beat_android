@@ -32,7 +32,7 @@ class VibrationService(private val vibrator: Vibrator) {
                     // Handle exception, e.g., log or display error message
                     println("Error polling for vibrations: ${e.message}")
                 }
-                delay(5 * 60 * 1000L) // Delay for 5 minutes
+                delay(2 * 60 * 1000L) // Delay for 2 minutes
             }
         }
     }
@@ -76,9 +76,10 @@ class VibrationService(private val vibrator: Vibrator) {
         withContext(Dispatchers.IO) {
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    val jsonResponse = JSONObject(response.body?.string())
+                    val jsonResponse = JSONObject(response.body!!.string())
                     if (jsonResponse.getBoolean("vibrate")) {
-//                        val senderId = jsonResponse.getString("from")
+                        val senderId = jsonResponse.getString("from")
+                        println("Received vibration from $senderId")
                         vibrate()
                     }
                 } else {
