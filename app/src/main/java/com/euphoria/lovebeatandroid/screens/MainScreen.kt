@@ -1,6 +1,9 @@
 package com.euphoria.lovebeatandroid.screens
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,16 +59,18 @@ fun MainScreen(storageService: StorageService, vibrationService: VibrationServic
     val context = LocalContext.current
     var user by remember { mutableStateOf(User()) }
     var isLoading by remember { mutableStateOf(true) }
+    var isHeartGifPlaying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-//        For testing purposes, save sample UUIDs
+        // For testing purposes, save sample UUIDs
         storageService.savePartnerUuid("2c7f3281-e76e-406c-a7d8-7b1e58300671")
         storageService.saveMyUuid("cea36efa-e594-43bf-9c17-46fef950d3c2")
-// ======================================
+        // ======================================
         user.uuid = storageService.getMyUuid()
         user.partnerUuid = storageService.getPartnerUuid() ?: ""
         isLoading = false
 
+        // Start the PollingService once the user ID is available
         if (user.uuid.isNotEmpty()) {
             val intent = Intent(context, PollingService::class.java).apply {
                 putExtra("USER_ID", user.uuid)
@@ -73,12 +79,27 @@ fun MainScreen(storageService: StorageService, vibrationService: VibrationServic
         }
     }
 
+    // Register BroadcastReceiver
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                isHeartGifPlaying = true
+            }
+        }
+        val filter = IntentFilter("com.euphoria.lovebeatandroid.VIBRATION_RECEIVED")
+        context.registerReceiver(receiver, filter)
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
     if (isLoading) {
         LoadingScreen()
     } else if (user.partnerUuid.isEmpty()) {
         PairingScreen(user, storageService, vibrationService)
     } else {
-        VibrationScreen(user, vibrationService)
+        VibrationScreen(user, vibrationService, isHeartGifPlaying)
     }
 }
 
@@ -123,19 +144,19 @@ fun PairingScreenPreview() {
 }
 
 @Composable
-fun VibrationScreen(user: User, vibrationService: VibrationService) {
-    AnimateGifOnTap(vibrationService, user)
+fun VibrationScreen(user: User, vibrationService: VibrationService, isHeartGifPlaying: Boolean) {
+    AnimateGifOnTap(vibrationService, user, isHeartGifPlaying)
 }
 
 @Composable
-fun AnimateGifOnTap(vibrationService: VibrationService, user: User) {
+fun AnimateGifOnTap(vibrationService: VibrationService, user: User, isHeartGifPlaying: Boolean) {
     val context = LocalContext.current
-    var isHeartGifPlaying by remember { mutableStateOf(false) }
+    var isGifPlaying by remember { mutableStateOf(isHeartGifPlaying) }
 
     // Use Coil's AsyncImage for handling GIFs
     val painter = rememberImagePainter(
         ImageRequest.Builder(context)
-            .data(if (isHeartGifPlaying) R.drawable.heart else null)
+            .data(if (isGifPlaying) R.drawable.heart else null)
             .decoderFactory(ImageDecoderDecoder.Factory()) // Decoder for animated GIFs
             .size(Size.ORIGINAL)
             .build()
@@ -147,11 +168,11 @@ fun AnimateGifOnTap(vibrationService: VibrationService, user: User) {
             .fillMaxSize()
             .background(color = Color(0xff25283d))
             .clickable {
-                isHeartGifPlaying = true
+                isGifPlaying = true
             },
         contentAlignment = Alignment.Center
     ) {
-        if (isHeartGifPlaying) {
+        if (isGifPlaying) {
             Image(
                 painter = painter,
                 contentDescription = "Heartbeat Animation",
@@ -175,12 +196,12 @@ fun AnimateGifOnTap(vibrationService: VibrationService, user: User) {
         }
     }
 
-    LaunchedEffect(isHeartGifPlaying) {
-        if (isHeartGifPlaying) {
+    LaunchedEffect(isGifPlaying) {
+        if (isGifPlaying) {
             vibrationService.vibrate()
             vibrationService.sendVibration(user.uuid, user.partnerUuid)
             delay(2000)
-            isHeartGifPlaying = false
+            isGifPlaying = false
         }
     }
 }

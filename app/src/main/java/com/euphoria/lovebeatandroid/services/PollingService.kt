@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
+import com.euphoria.lovebeatandroid.R
 
 class PollingService : Service() {
 
@@ -24,7 +26,11 @@ class PollingService : Service() {
         val userId = intent?.getStringExtra("USER_ID") ?: return START_NOT_STICKY
 
         startForegroundService()
-        vibrationService.startPolling(userId)
+        vibrationService.startPolling(userId) { success ->
+            if (success) {
+                sendVibrationReceivedBroadcast()
+            }
+        }
 
         return START_STICKY
     }
@@ -33,17 +39,24 @@ class PollingService : Service() {
         val channelId = "PollingServiceChannel"
         val channelName = "Polling Service Channel"
 
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("LoveBeat Service")
-            .setContentText("Listening for love in the air...")
+            .setContentTitle("Polling Service")
+            .setContentText("Listening for vibrations...")
 //            .setSmallIcon(R.drawable.ic_notification)
             .build()
 
         startForeground(1, notification)
+    }
+
+    private fun sendVibrationReceivedBroadcast() {
+        val intent = Intent("com.euphoria.lovebeatandroid.VIBRATION_RECEIVED")
+        sendBroadcast(intent)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
