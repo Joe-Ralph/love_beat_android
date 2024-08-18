@@ -1,0 +1,58 @@
+# Gradle files
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Android Studio files
+.idea/
+*.iml
+
+# Keystore files
+*.jks
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild/
+
+# IntelliJ
+*.ipr
+*.iws
+*.idea/
+
+# User-specific configurations
+.idea/caches
+.idea/libraries
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Android Studio 3.1+ serialized cache file
+.idea/.name
+
+# Android Studio 3.5+ build output
+.idea/deploymentTargetSelector.xml
+
+# Gradle
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Proguard
+proguard/
+proguard-rules.pro
+
+# Miscellaneous
+.DS_Store
+*.log
+*.swp
+*.swo
+*.swn
+
+# Android specific
+local.properties
