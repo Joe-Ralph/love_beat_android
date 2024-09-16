@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.euphoria.lovebeatandroid"
-        minSdk = 30
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -51,6 +51,8 @@ android {
 dependencies {
 
     implementation(libs.play.services.wearable)
+    implementation(libs.play.services.nearby)
+    implementation(libs.navigation.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.tooling.preview)
@@ -68,9 +70,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
+    implementation(libs.lottie.compose)
     debugImplementation(libs.ui.test.manifest)
+    debugImplementation(libs.ui.tooling)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(platform(libs.compose.bom))
 
 }
