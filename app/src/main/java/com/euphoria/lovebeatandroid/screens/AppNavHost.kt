@@ -1,5 +1,6 @@
 package com.euphoria.lovebeatandroid.screens
 
+import android.app.Activity
 import android.content.Context
 import android.os.Vibrator
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.navigation.compose.composable
 import com.euphoria.lovebeatandroid.models.User
 import com.euphoria.lovebeatandroid.navigation.NavigationItem
 import com.euphoria.lovebeatandroid.services.NearbyConnectionsService
+import com.euphoria.lovebeatandroid.services.NfcService
 import com.euphoria.lovebeatandroid.services.StorageService
 import com.euphoria.lovebeatandroid.services.VibrationService
 import com.euphoria.lovebeatandroid.services.WifiDirectService
@@ -24,6 +26,7 @@ fun AppNavHost(
     val vibrationService = VibrationService(vibrator)
     val nearbyConnectionsService = NearbyConnectionsService(context)
     val wifiDirectService = WifiDirectService(context)
+    val nfcService = NfcService(activity = context as Activity)
     val user = User()
     NavHost(navController = navHostController, startDestination = startDestination) {
         composable(NavigationItem.Main.route) {
@@ -51,10 +54,10 @@ fun AppNavHost(
             )
         }
         composable(NavigationItem.SenderScreen.route) {
-            SenderScreen(navController = navHostController, wifiDirectService = wifiDirectService)
+            SenderScreen(navController = navHostController, wifiDirectService = wifiDirectService, nfcService = nfcService)
         }
         composable(NavigationItem.ReceiverScreen.route) {
-            ReceiverScreen(navController = navHostController, wifiDirectService = wifiDirectService)
+            ReceiverScreen(navController = navHostController, wifiDirectService = wifiDirectService, nfcService = nfcService)
         }
         composable(NavigationItem.Consent.route) { backStackEntry ->
             ConsentScreen(
