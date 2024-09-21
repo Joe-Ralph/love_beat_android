@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 //@Preview(widthDp = 512, heightDp = 512, apiLevel = 33)
 fun SenderScreen(navController: NavHostController, wifiDirectService: WifiDirectService) {
 
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var error by remember { mutableStateOf<String?>(null) }
     var isAdvertising by remember { mutableStateOf(false) }
 
@@ -44,18 +44,29 @@ fun SenderScreen(navController: NavHostController, wifiDirectService: WifiDirect
     }
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
+        scope.launch {
             try {
-                error = null
-                // Assuming a method to start advertising exists in WifiDirectService
-                wifiDirectService.startAdvertising()
-                isAdvertising = true
+                isAdvertising = wifiDirectService.startAdvertising()
             } catch (e: Exception) {
-                error = "Failed to start advertising: ${e.message}"
+                error = e.message
+            }
+        }
+//        enabled = !isAdvertising
+
+        wifiDirectService.connectionState.collect { state ->
+            when (state) {
+                is WifiDirectService.ConnectionState.Connected -> {
+                    navController.navigate("consent/${state.device.deviceAddress}")
+                }
+
+                is WifiDirectService.ConnectionState.Failed -> {
+                    error = "Connection failed: ${state.reason}"
+                }
+
+                else -> {}
             }
         }
     }
-//    enabled = !isAdvertising
 
 
     val pairLoaderLottieComposition by rememberLottieComposition(

@@ -56,5 +56,19 @@ fun AppNavHost(
         composable(NavigationItem.ReceiverScreen.route) {
             ReceiverScreen(navController = navHostController, wifiDirectService = wifiDirectService)
         }
+        composable(NavigationItem.Consent.route) { backStackEntry ->
+            ConsentScreen(
+                wifiDirectService = wifiDirectService,
+                navController = navHostController,
+                deviceAddress = backStackEntry.arguments?.getString("deviceAddress") ?: ""
+            )
+        }
+        composable("success/{partnerUuid}") { backStackEntry ->
+            SuccessScreen(
+                partnerUuid = backStackEntry.arguments?.getString("partnerUuid") ?: "",
+                navController = navHostController
+            )
+        }
+
     }
 }

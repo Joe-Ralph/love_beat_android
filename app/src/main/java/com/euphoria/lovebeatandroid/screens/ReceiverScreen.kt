@@ -4,11 +4,17 @@ import android.net.wifi.p2p.WifiP2pDevice
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,17 +43,19 @@ fun ReceiverScreen(navController: NavHostController, wifiDirectService: WifiDire
         navController.popBackStack() // Navigates back to Screen 1
     }
 
-    var devices by remember { mutableStateOf(listOf<WifiP2pDevice>()) }
+    var peers by remember { mutableStateOf(listOf<WifiP2pDevice>()) }
     var isScanning by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
+        scope.launch {
             try {
                 error = null
                 isScanning = true
-                devices = wifiDirectService.discoverPeers()
+                wifiDirectService.discoverPeers().collect { newPeers ->
+                    peers = newPeers
+                }
             } catch (e: Exception) {
                 error = "Failed to discover peers: ${e.message}"
             } finally {
@@ -65,10 +73,12 @@ fun ReceiverScreen(navController: NavHostController, wifiDirectService: WifiDire
     )
 
     val preloaderProgress by animateLottieCompositionAsState(
-        pairLoaderLottieComposition,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true
+        pairLoaderLottieComposition, iterations = LottieConstants.IterateForever, isPlaying = true
     )
+
+    val list = listOf(
+        "A", "B", "C", "D"
+    ) + ((0..100).map { it.toString() })
 
     Box(
         modifier = Modifier
@@ -79,10 +89,33 @@ fun ReceiverScreen(navController: NavHostController, wifiDirectService: WifiDire
             .wrapContentWidth(align = Alignment.CenterHorizontally)
             .wrapContentHeight(align = Alignment.CenterVertically)
     ) {
-
-        LottieAnimation(
-            composition = pairLoaderLottieComposition,
-            progress = preloaderProgress
-        )
+        if (isScanning) {
+            LottieAnimation(
+                composition = pairLoaderLottieComposition, progress = preloaderProgress
+            )
+        } else if (error == null) {
+            LazyColumn(modifier = Modifier.fillMaxHeight()) {
+                items(peers.size) { device ->
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    if (wifiDirectService.connectToDevice(device)) {
+                                        navController.navigate("consent/${device.deviceAddress}")
+                                    }
+                                } catch (e: Exception) {
+                                    error = e.message
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    ) {
+                        Text(device.deviceName)
+                    }
+                }
+            }
+        } else {
+            Text(text = error!!, color = Color.Red)
+        }
     }
 }
