@@ -31,11 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.euphoria.lovebeatandroid.navigation.NavigationItem
-import com.euphoria.lovebeatandroid.services.WifiDirectService
 
 @Composable
 //@Preview(widthDp = 225, heightDp = 225, apiLevel = 33)
-fun PairingScreen(navHostController: NavHostController, wifiDirectService: WifiDirectService) {
+fun PairingScreen(navHostController: NavHostController) {
     var isSender by remember { mutableStateOf(false) }
 
     BackHandler {

@@ -31,11 +31,12 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.euphoria.lovebeatandroid.R
 import com.euphoria.lovebeatandroid.data.getRandomLoveNote
+import com.euphoria.lovebeatandroid.services.StorageService
 import com.euphoria.lovebeatandroid.services.VibrationService
 import kotlinx.coroutines.delay
 
 @Composable
-fun VibrationScreen(myUuid: String, partnerUuid: String?, vibrationService: VibrationService) {
+fun VibrationScreen(myUuid: String, partnerUuid: String, vibrationService: VibrationService, storageService: StorageService) {
     val context = LocalContext.current
     var isGifPlaying by remember { mutableStateOf(false) }
 
@@ -45,6 +46,10 @@ fun VibrationScreen(myUuid: String, partnerUuid: String?, vibrationService: Vibr
             .decoderFactory(ImageDecoderDecoder.Factory()) // Decoder for animated GIFs
             .size(Size.ORIGINAL).build()
     )
+
+    var myUuidFromStorage by remember { mutableStateOf("") }
+    var partnerUuidFromStorage by remember { mutableStateOf("") }
+
 
     // Box to align image in the center of the screen
     Box(
@@ -82,8 +87,14 @@ fun VibrationScreen(myUuid: String, partnerUuid: String?, vibrationService: Vibr
     LaunchedEffect(isGifPlaying) {
         if (isGifPlaying) {
             vibrationService.vibrate()
-            if (partnerUuid != null) {
-                vibrationService.sendVibration(myUuid, partnerUuid)
+            myUuidFromStorage = storageService.getMyUuid()!!
+            partnerUuidFromStorage = storageService.getPartnerUuid()!!
+            println("My UUID from storage: $myUuidFromStorage")
+            println("Partner UUID from storage: $partnerUuidFromStorage")
+            if (partnerUuid != null && myUuid != null) {
+                val finalMyUuid = if (myUuidFromStorage.isNotEmpty()) myUuidFromStorage else myUuid
+                val finalPartnerUuid = if (partnerUuidFromStorage.isNotEmpty()) partnerUuidFromStorage else partnerUuid
+                vibrationService.sendVibration(finalMyUuid, finalPartnerUuid)
             }
             delay(2000)
             isGifPlaying = false

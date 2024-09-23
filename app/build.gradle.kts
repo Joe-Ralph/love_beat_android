@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.lottie.compose)
+    implementation(libs.qrcode)
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.ui.tooling)
     androidTestImplementation(libs.ui.test.junit4)

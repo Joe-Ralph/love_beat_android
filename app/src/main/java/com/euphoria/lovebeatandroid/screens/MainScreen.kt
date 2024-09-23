@@ -1,96 +1,120 @@
 package com.euphoria.lovebeatandroid.screens
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startForegroundService
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.euphoria.lovebeatandroid.R
-import com.euphoria.lovebeatandroid.models.User
 import com.euphoria.lovebeatandroid.navigation.NavigationItem
-import com.euphoria.lovebeatandroid.services.NearbyConnectionsService
 import com.euphoria.lovebeatandroid.services.PollingService
 import com.euphoria.lovebeatandroid.services.StorageService
-import com.euphoria.lovebeatandroid.services.VibrationService
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 val great_vibes_font = FontFamily(
     Font(resId = R.font.greatvibes, weight = FontWeight.Normal, style = FontStyle.Normal),
 )
 
-
 @Composable
 fun MainScreen(
     storageService: StorageService,
-    vibrationService: VibrationService,
-    nearbyConnectionsService: NearbyConnectionsService,
     navHostController: NavHostController
 ) {
     val context = LocalContext.current
-//    val user by remember { mutableStateOf(User()) }
-    val user = User()
-    var isLoading by remember { mutableStateOf(false) }
+    var loadingState by remember { mutableStateOf<LoadingState>(LoadingState.Loading) }
 
-    LaunchedEffect(Unit) {
-        // For testing purposes, save sample UUIDs
-//        storageService.savePartnerUuid("2c7f3281-e76e-406c-a7d8-7b1e58300671")
-//        storageService.saveMyUuid("cea36efa-e594-43bf-9c17-46fef950d3c2")
-        // ======================================
-//        user.uuid = storageService.getMyUuid()
-//        user.partnerUuid = storageService.getPartnerUuid() ?: ""
-//        user.uuid = "cea36efa-e594-43bf-9c17-46fef950d3c2"
-//        user.partnerUuid = "2c7f3281-e76e-406c-a7d8-7b1e58300671"
-//        isLoading = false
+    LaunchedEffect(key1 = Unit) {
+        withContext(Dispatchers.IO) {
 
-        // Start the PollingService once the user ID is available
-        if (user.uuid.isNotEmpty()) {
-            println("Done loading user data: $user")
-            val intent = Intent(context, PollingService::class.java).apply {
-                putExtra("USER_ID", user.uuid)
+            val myUuid = storageService.getMyUuid() ?: ""
+            val myPartnerUuid = storageService.getPartnerUuid() ?: ""
+            println("Loading user data from storage @ Main UUID: $myUuid, Partner UUID: $myPartnerUuid")
+            if (myUuid.isNotEmpty()) {
+                println("Done loading user data: UUID: $myUuid, Partner UUID: $myPartnerUuid")
+                val intent = Intent(context, PollingService::class.java).apply {
+                    putExtra("USER_ID", myUuid)
+                }
+                withContext(Dispatchers.Main) {
+                    startForegroundService(context, intent)
+                }
             }
-            startForegroundService(context, intent)
+            loadingState = LoadingState.Loaded(myUuid, myPartnerUuid)
         }
     }
 
-    // Register BroadcastReceiver
-    DisposableEffect(Unit) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
+    when (val state = loadingState) {
+        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.Loaded -> {
+            LaunchedEffect(state) {
+                if (state.partnerUuid.isEmpty()) {
+                    println("nav to pairing")
+                    navHostController.navigate(NavigationItem.Pairing.route)
+                } else {
+                    println("nav to vibration")
+                    navHostController.navigate(NavigationItem.Vibration.route)
+                }
             }
         }
-        val filter = IntentFilter("com.euphoria.lovebeatandroid.VIBRATION_RECEIVED")
-        context.registerReceiver(receiver, filter)
-
-        onDispose {
-            context.unregisterReceiver(receiver)
-        }
-    }
-
-    if (isLoading) {
-        LoadingScreen()
-    } else if (user.partnerUuid.isEmpty()) {
-        println("nav to pairing $user")
-        navHostController.navigate(NavigationItem.Pairing.route)
-    } else {
-//        println("nav to vibration $user")
-        navHostController.navigate(NavigationItem.Vibration.route)
     }
 }
 
+
 @Composable
 fun LoadingScreen() {
-    // Implement loading screen UI
+    val pairLoaderLottieComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(
+            R.raw.pairloader
+        )
+    )
+
+    val preloaderProgress by animateLottieCompositionAsState(
+        pairLoaderLottieComposition, iterations = LottieConstants.IterateForever, isPlaying = true
+    )
+    // Your loading UI here
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .size(512.dp)
+            .clip(shape = RoundedCornerShape(512.dp))
+            .background(color = Color(0xff000212))
+            .wrapContentWidth(align = Alignment.CenterHorizontally)
+            .wrapContentHeight(align = Alignment.CenterVertically)
+    ) {
+        LottieAnimation(
+            composition = pairLoaderLottieComposition, progress = preloaderProgress,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+sealed class LoadingState {
+    object Loading : LoadingState()
+    data class Loaded(val uuid: String, val partnerUuid: String) : LoadingState()
 }
