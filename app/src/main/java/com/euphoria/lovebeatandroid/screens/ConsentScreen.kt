@@ -50,7 +50,7 @@ fun SuccessScreen(navController: NavController) {
 }
 
 @Composable
-@Preview(widthDp = 512, heightDp = 512, apiLevel = 33)
+//@Preview(widthDp = 512, heightDp = 512, apiLevel = 33)
 fun SuccessScreenPreview() {
     var showAnimation by remember { mutableStateOf(true) }
 

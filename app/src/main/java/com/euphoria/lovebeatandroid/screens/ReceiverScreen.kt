@@ -97,17 +97,12 @@ fun ReceiverScreen(navController: NavHostController, webPairingService: WebPairi
         Column(
             modifier = Modifier.align(Alignment.Center)
         ) {
-            // Text(
-            //     text = "Pairing code:",
-            //     color = Color(0xFFD73371),
-            //     modifier = Modifier.align(Alignment.CenterHorizontally)
-            // )
             Text(
-                text = "$pairCode",
-                color = Color(0xFFD73371),
+                text = pairCode,
+                color = Color(0xFFFFFFFF),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 style = TextStyle(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     letterSpacing = 2.sp,
                     fontSize = 20.sp
                 )
@@ -118,7 +113,7 @@ fun ReceiverScreen(navController: NavHostController, webPairingService: WebPairi
 
 
 @Composable
-@Preview(widthDp = 512, heightDp = 512, apiLevel = 33)
+//@Preview(widthDp = 512, heightDp = 512, apiLevel = 33)
 fun ReceiverScreenPreview() {
 
     val pairLoaderLottieComposition by rememberLottieComposition(

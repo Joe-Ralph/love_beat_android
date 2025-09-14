@@ -73,7 +73,7 @@ fun VibrationScreen(myUuid: String, partnerUuid: String, vibrationService: Vibra
                 textAlign = TextAlign.Center,
                 fontFamily = great_vibes_font,
                 style = TextStyle(
-                    fontSize = 40.sp
+                    fontSize = 30.sp
                 ),
                 modifier = Modifier
                     .requiredWidth(width = 200.dp)

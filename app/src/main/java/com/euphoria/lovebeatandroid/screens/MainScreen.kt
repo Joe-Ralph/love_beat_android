@@ -39,8 +39,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 val great_vibes_font = FontFamily(
-    Font(resId = R.font.greatvibes, weight = FontWeight.Normal, style = FontStyle.Normal),
+    Font(resId = R.font.satisfy, weight = FontWeight.Normal, style = FontStyle.Normal),
 )
+
 
 @Composable
 fun MainScreen(
