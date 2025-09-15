@@ -38,8 +38,6 @@ fun AppNavHost(
             NavigationItem.Vibration.route
         ) {
             VibrationScreen(
-                myUuid = "cea36efa-e594-43bf-9c17-46fef950d3c2",
-                partnerUuid = "2c7f3281-e76e-406c-a7d8-7b1e58300671",
                 vibrationService = vibrationService,
                 storageService = storageService,
                 navController = navHostController

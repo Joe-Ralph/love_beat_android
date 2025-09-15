@@ -3,10 +3,20 @@ package com.euphoria.lovebeatandroid.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,11 +41,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun VibrationScreen(
-    myUuid: String,
-    partnerUuid: String,
     vibrationService: VibrationService,
     storageService: StorageService,
     navController: NavController
@@ -45,7 +52,7 @@ fun VibrationScreen(
     val navigateToUnpairScreen: () -> Unit = {
         navController.navigate(NavigationItem.UnPair.route)
     }
-
+    var currentLoveNote by remember { mutableStateOf(getRandomLoveNote()) }
     val painter = rememberAsyncImagePainter(
         ImageRequest.Builder(context).data(if (isGifPlaying) R.drawable.heart else null)
             .decoderFactory(ImageDecoderDecoder.Factory())
@@ -88,10 +95,10 @@ fun VibrationScreen(
             )
         } else {
             Text(
-                text = getRandomLoveNote(),
+                text = currentLoveNote,
                 color = Color(0xFFD73371),
                 textAlign = TextAlign.Center,
-                 fontFamily = satisfy_font,
+                fontFamily = satisfy_font,
                 style = TextStyle(
                     fontSize = 30.sp
                 ),
@@ -117,17 +124,20 @@ fun VibrationScreen(
             println("My UUID from storage: $myUuidFromStorage")
             println("Partner UUID from storage: $partnerUuidFromStorage")
 
-            val finalMyUuid = if (myUuidFromStorage.isNotEmpty()) myUuidFromStorage else myUuid
-            val finalPartnerUuid = if (partnerUuidFromStorage.isNotEmpty()) partnerUuidFromStorage else partnerUuid
+            val finalMyUuid = myUuidFromStorage.ifEmpty { "" }
+            val finalPartnerUuid = partnerUuidFromStorage.ifEmpty { "" }
 
             if (finalMyUuid.isNotEmpty() && finalPartnerUuid.isNotEmpty()) {
                 vibrationService.sendVibration(finalMyUuid, finalPartnerUuid)
             } else {
-                println("Cannot send vibration: UUIDs are missing.")
+                navController.clearBackStack<Boolean>();
+                navController.navigate(NavigationItem.Main.route)
             }
 
             delay(2000)
             isGifPlaying = false
+        } else {
+            currentLoveNote = getRandomLoveNote()
         }
     }
 }
