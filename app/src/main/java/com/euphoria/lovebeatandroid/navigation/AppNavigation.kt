@@ -6,7 +6,8 @@ enum class Screen(val route: String) {
     VIBRATION("vibration"),
     SENDER_SCREEN("sender_screen"),
     RECEIVER_SCREEN("receiver_screen"),
-    SUCCESS_SCREEN("success/{uuid:String}")
+    SUCCESS_SCREEN("success/{uuid:String}"),
+    UNPAIR_SCREEN("unpair_screen")
 }
 
 sealed class NavigationItem(val route: String) {
@@ -16,5 +17,5 @@ sealed class NavigationItem(val route: String) {
     object ReceiverScreen : NavigationItem(Screen.RECEIVER_SCREEN.name)
     object Vibration : NavigationItem(Screen.VIBRATION.name)
     object Success : NavigationItem(Screen.SUCCESS_SCREEN.name)
-
+    object UnPair : NavigationItem(Screen.UNPAIR_SCREEN.name)
 }

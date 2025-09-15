@@ -3,6 +3,7 @@ package com.euphoria.lovebeatandroid.screens
 import android.content.Context
 import android.os.Vibrator
 import androidx.compose.runtime.Composable
+import androidx.datastore.core.Storage
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,6 +42,7 @@ fun AppNavHost(
                 partnerUuid = "2c7f3281-e76e-406c-a7d8-7b1e58300671",
                 vibrationService = vibrationService,
                 storageService = storageService,
+                navController = navHostController
             )
         }
         composable(NavigationItem.SenderScreen.route) {
@@ -59,6 +61,13 @@ fun AppNavHost(
         }
         composable(NavigationItem.Success.route) {
             SuccessScreen(navController = navHostController)
+        }
+
+        composable(NavigationItem.UnPair.route) {
+            UnpairScreen(
+                navController = navHostController,
+                storageService = storageService
+            )
         }
     }
 }

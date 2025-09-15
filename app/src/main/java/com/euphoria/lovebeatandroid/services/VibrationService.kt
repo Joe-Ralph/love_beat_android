@@ -38,10 +38,9 @@ class VibrationService(private val vibrator: Vibrator) {
                         onVibrationReceived(true)
                     }
                 } catch (e: Exception) {
-                    // Handle exception, e.g., log or display error message
                     println("Error polling for vibrations: ${e.message}")
                 }
-                delay(30 * 1000L) // Delay for 2 minutes before next poll
+                delay(30 * 1000L)
             }
         }
     }

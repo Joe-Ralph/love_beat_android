@@ -38,7 +38,7 @@ import com.euphoria.lovebeatandroid.services.StorageService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-val great_vibes_font = FontFamily(
+val satisfy_font = FontFamily(
     Font(resId = R.font.satisfy, weight = FontWeight.Normal, style = FontStyle.Normal),
 )
 

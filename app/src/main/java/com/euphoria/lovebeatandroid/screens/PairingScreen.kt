@@ -69,7 +69,7 @@ fun PairingScreen(navHostController: NavHostController) {
                     text = "Seek",
                     color = Color(0xffffffff),
                     textAlign = TextAlign.Center,
-                    fontFamily = great_vibes_font,
+                    fontFamily = satisfy_font,
                     style = TextStyle(
                         fontSize = 20.sp
                     ),
@@ -91,7 +91,7 @@ fun PairingScreen(navHostController: NavHostController) {
                     text = "Embrace",
                     color = Color(0xffffffff),
                     textAlign = TextAlign.Center,
-                    fontFamily = great_vibes_font,
+                    fontFamily = satisfy_font,
                     style = TextStyle(
                         fontSize = 20.sp
                     ),
